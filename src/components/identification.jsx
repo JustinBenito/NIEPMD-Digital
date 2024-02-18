@@ -1,7 +1,7 @@
 import React from 'react'
 import { useEffect,useState } from 'react'
 
-const Identi = () => {
+const Identi = ({ onSave }) => {
     const [currentDate, setCurrentDate] = useState(null);
 
     useEffect(()=>{
@@ -14,12 +14,20 @@ const Identi = () => {
       setCurrentDate(formattedDate);
     })
 
+    const handleSave = (e) => {
+        e.preventDefault();
+        // TODO: Add your logic to save data to the database
+    
+        // Call the onSave callback to switch to the next tab
+        onSave();
+      };
+
 
   return (
     <div className='mt-5 border-gray-100 max-w-5xl mx-auto gap-2'>
         <h1 className='text-5xl font-bold'>Identification Data</h1>
 
-<form>
+<form onSubmit={handleSave}>
     <div class="grid gap-6 mb-6 md:grid-cols-2 mt-8">
         <div>
             <label for="first_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Name</label>

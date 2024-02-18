@@ -1,10 +1,22 @@
 import React from 'react'
 
-const Expect = () => {
+const Expect = ({ onSave }) => {
+
+  const handleSave = (e) => {
+    e.preventDefault();
+    // TODO: Add your logic to save data to the database
+
+    // Call the onSave callback to switch to the next tab
+    onSave();
+  };
+
+
+
+
   return (
     <div className='mt-5 border-gray-100 max-w-5xl mx-auto gap-2'>
 
-<form>
+<form onSubmit={handleSave}>
         
 <div class="mb-6">
         <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Expectations</label>

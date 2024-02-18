@@ -1,11 +1,25 @@
 import React from 'react'
 import EditableTable from './table'
 
-const Development = () => {
+const Development = ({ onSave }) => {
+
+
+  const handleSave = (e) => {
+    e.preventDefault();
+    // TODO: Add your logic to save data to the database
+
+    // Call the onSave callback to switch to the next tab
+    onSave();
+  };
+
+
+
+
   return (
     <div>
     <h1 className='text-5xl font-bold'>Developmental History</h1>
 
+    <form onSubmit={handleSave}>
 
 <div class="relative overflow-x-auto shadow-md sm:rounded-lg mt-8">
 <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400 border-collapse">
@@ -143,7 +157,7 @@ const Development = () => {
 </ul>
 </div>
 
-<form>
+
         
 <div class="mb-6 mt-4">
         <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">REASON FOR THE CONDITION OF THE CLIENT AS PERCEIVED BY THE INFORMANT:</label>

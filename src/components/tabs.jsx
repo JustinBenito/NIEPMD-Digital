@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useState} from 'react'
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
 import Identi from './identification';
@@ -11,13 +11,25 @@ import Expect from './expect';
 import SchoolHist from './schoolhistory';
 import Special from './spledu';
 import MedExam from './medexam';
-
+import Nav from './nav';
 
 const TopTabs = () => {
+
+  const [tabIndex, setTabIndex] = useState(0);
+
+  const handleTabChange = () => {
+    setTabIndex((prevIndex) => Math.min(prevIndex + 1, 9));
+  };
+
+
   return (
+    <>
+    <Nav />
     <div className=' mt-5 border-gray-100 max-w-5xl mx-auto gap-2 px-4'
     >
-    <Tabs >
+
+    
+    <Tabs selectedIndex={tabIndex} onSelect={(index) => setTabIndex(index)} >
     <TabList>
       <Tab>Section 1</Tab>
       <Tab>Section 2</Tab>
@@ -32,37 +44,38 @@ const TopTabs = () => {
     </TabList>
 
     <TabPanel>
-      <Identi />
+      <Identi onSave={handleTabChange}/>
     </TabPanel>
     <TabPanel>
-      <Demo/>
+      <Demo onSave={handleTabChange}/>
     </TabPanel>
     <TabPanel>
-      <Present/>
+      <Present onSave={handleTabChange}/>
     </TabPanel>
     <TabPanel>
-      <History />
+      <History onSave={handleTabChange}/>
     </TabPanel>
     <TabPanel>
-      <School />
+      <School onSave={handleTabChange}/>
     </TabPanel>
     <TabPanel>
-      <Development />
+      <Development onSave={handleTabChange}/>
     </TabPanel>
     <TabPanel>
-      <Expect />
+      <Expect onSave={handleTabChange}/>
     </TabPanel>
     <TabPanel>
-      <SchoolHist />
+      <SchoolHist onSave={handleTabChange}/>
     </TabPanel>
     <TabPanel>
-      <Special />
+      <Special onSave={handleTabChange}/>
     </TabPanel>
     <TabPanel>
-      <MedExam />
+      <MedExam onSave={handleTabChange}/>
     </TabPanel>
   </Tabs>
   </div>
+  </>
   )
 }
 
