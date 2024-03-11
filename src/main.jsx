@@ -4,6 +4,8 @@ import App from './App.jsx'
 import './index.css'
 import Home from './components/home.jsx'
 import TopTabs from './components/tabs.jsx'
+import Signature from './components/signature'
+
 import {
   createBrowserRouter,
   RouterProvider,
@@ -11,11 +13,11 @@ import {
 
 const router = createBrowserRouter([
   {
-    path: "/",
-    element: <TopTabs />,
+    path: "add",
+    element: <><TopTabs /></>,
   },
   {
-    path: "add",
+    path: "/",
     element: <Home />,
   }
 ]);
