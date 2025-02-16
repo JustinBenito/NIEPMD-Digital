@@ -13,7 +13,6 @@ import Special from './spledu';
 import MedExam from './medexam';
 import Nav from './nav';
 import back from '../assets/back.svg'
-import { Navigate, useNavigate } from 'react-router-dom';
 import Motor from './motor';
 import Intellectual from './intellectual';
 import Signature from './signature';
