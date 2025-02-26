@@ -5,6 +5,7 @@ import './index.css'
 import Home from './components/home.jsx'
 import TopTabs from './components/tabs.jsx'
 import Signature from './components/signature'
+import NewInputPage from './components/finalpdf.jsx'
 
 import {
   createBrowserRouter,
@@ -19,6 +20,10 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <Home />,
+  },
+  {
+    path: "/new-input",
+    element: <NewInputPage />,
   }
 ]);
 

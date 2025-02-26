@@ -1,6 +1,77 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore'
 
-const Intellectual = () => {
+const Intellectual = ({ onSave }) => {
+  const [formData, setFormData] = useState({});
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get('id');
+        if (!id) return;
+
+        const db = getFirestore();
+        const docRef = doc(db, 'patients', id);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data.intellectualAssessment) {
+            setFormData(data.intellectualAssessment);
+            Object.keys(data.intellectualAssessment).forEach(key => {
+              const element = document.getElementById(key);
+              if (element) {
+                if (element.type === 'checkbox') {
+                  element.checked = data.intellectualAssessment[key];
+                } else {
+                  element.value = data.intellectualAssessment[key];
+                }
+              }
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const id = urlParams.get('id');
+      if (!id) throw new Error('No ID provided');
+
+      const formData = {
+        generalBehavior: document.getElementById('generalBehavior').value,
+        attentionConcentration: document.getElementById('attentionConcentration').value,
+        activityLevel: document.getElementById('activityLevel').value,
+        comprehension: document.getElementById('comprehension').value,
+        emotionalityBehaviour: document.getElementById('emotionalityBehaviour').value,
+        relationship: document.getElementById('relationship').value,
+        dst: document.getElementById('dst').checked,
+        sfb: document.getElementById('sfb').checked,
+        vsms: document.getElementById('vsms').checked,
+        misic: document.getElementById('misic').checked,
+        gds: document.getElementById('gds').checked,
+        bkt: document.getElementById('bkt').checked
+      };
+
+      const db = getFirestore();
+      const docRef = doc(db, 'patients', id);
+      await setDoc(docRef, { intellectualAssessment: formData }, { merge: true });
+      
+      onSave();
+    } catch (error) {
+      console.error('Error saving data:', error);
+      alert('Error saving data. Please try again.');
+    }
+  };
+
+
   return (
     <div>
         <div className="container mx-auto p-4">
@@ -168,21 +239,21 @@ const Intellectual = () => {
         </div>
 
         <div className="mb-6">
-        <label for="password" className="block mb-2 text-sm font-medium mt-4 text-gray-900  ">Provisional Diagnosis:</label>
+        <label htmlFor="password" className="block mb-2 text-sm font-medium mt-4 text-gray-900  ">Provisional Diagnosis:</label>
         <textarea type="password" id="password" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5   dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="" required />
         </div> 
 
         <div className="mb-6">
-        <label for="password" className="block mb-2 text-sm font-medium mt-4 text-gray-900  ">Management Plan:</label>
+        <label htmlFor="password" className="block mb-2 text-sm font-medium mt-4 text-gray-900  ">Management Plan:</label>
         <textarea type="password" id="password" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5   dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="" required />
         </div> 
 
         <div className="mb-6">
-        <label for="password" className="block mb-2 text-sm font-medium mt-4 text-gray-900  ">Referrals:</label>
+        <label htmlFor="password" className="block mb-2 text-sm font-medium mt-4 text-gray-900  ">Referrals:</label>
         <textarea type="password" id="password" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5   dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="" required />
         </div> 
 
-        <button type="submit" className="text-white bg-green-500 transition-colors ease-in-out hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:bg-green-800">Save</button>
+        <button onClick={handleSave} type="submit" className="text-white bg-green-500 transition-colors ease-in-out hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:bg-green-800">Save</button>
 
 
        </div>

@@ -1,14 +1,73 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore'
 
 const Special = ({ onSave }) => {
+    const [formData, setFormData] = useState({});
 
-    const handleSave = (e) => {
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const id = urlParams.get('id');
+                if (!id) return;
+
+                const db = getFirestore();
+                const docRef = doc(db, 'patients', id);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.specialEducation) {
+                        setFormData(data.specialEducation);
+                        Object.keys(data.specialEducation).forEach(key => {
+                            const element = document.getElementById(key);
+                            if (element) {
+                                element.value = data.specialEducation[key];
+                            }
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+        fetchData();
+    }, []);
+
+    const handleSave = async (e) => {
         e.preventDefault();
-        // TODO: Add your logic to save data to the database
-    
-        // Call the onSave callback to switch to the next tab
-        onSave();
-      };
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+            if (!id) throw new Error('No ID provided');
+
+            const formData = {
+                grossMotor: document.getElementById('grossMotor').value,
+                fineMotor: document.getElementById('fineMotor').value,
+                sensorySkills: document.getElementById('sensorySkills').value,
+                eatingSkills: document.getElementById('eatingSkills').value,
+                drinkingSkills: document.getElementById('drinkingSkills').value,
+                dressingSkills: document.getElementById('dressingSkills').value,
+                bathingSkills: document.getElementById('bathingSkills').value,
+                toiletingSkills: document.getElementById('toiletingSkills').value,
+                brushingSkills: document.getElementById('brushingSkills').value,
+                groomingSkills: document.getElementById('groomingSkills').value,
+                communicationSkills: document.getElementById('communicationSkills').value,
+                conceptSkills: document.getElementById('conceptSkills').value,
+                academicSkills: document.getElementById('academicSkills').value,
+                socializationSkills: document.getElementById('socializationSkills').value
+            };
+
+            const db = getFirestore();
+            const docRef = doc(db, 'patients', id);
+            await setDoc(docRef, { specialEducation: formData }, { merge: true });
+            
+            onSave();
+        } catch (error) {
+            console.error('Error saving data:', error);
+            alert('Error saving data. Please try again.');
+        }
+    };
 
 
 

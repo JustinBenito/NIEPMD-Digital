@@ -1,14 +1,70 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore'
 
 const SchoolHist = ({ onSave }) => {
+    const [formData, setFormData] = useState({});
 
-    const handleSave = (e) => {
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const id = urlParams.get('id');
+                if (!id) return;
+
+                const db = getFirestore();
+                const docRef = doc(db, 'patients', id);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.schoolHistory) {
+                        setFormData(data.schoolHistory);
+                        Object.keys(data.schoolHistory).forEach(key => {
+                            const element = document.getElementById(key);
+                            if (element) {
+                                if (element.type === 'radio') {
+                                    const radio = document.querySelector(`input[name="${key}"][value="${data.schoolHistory[key]}"]`);
+                                    if (radio) radio.checked = true;
+                                } else {
+                                    element.value = data.schoolHistory[key];
+                                }
+                            }
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+        fetchData();
+    }, []);
+
+    const handleSave = async (e) => {
         e.preventDefault();
-        // TODO: Add your logic to save data to the database
-    
-        // Call the onSave callback to switch to the next tab
-        onSave();
-      };
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+            if (!id) throw new Error('No ID provided');
+
+            const formData = {
+                attendingStatus: document.querySelector('input[name="list-radio2"]:checked')?.value || '',
+                schoolType: document.querySelector('input[name="list-radio3"]:checked')?.value || '',
+                passFailStatus: document.querySelector('input[name="list-radio4"]:checked')?.value || '',
+                schoolProblems: document.getElementById('schoolProblems').value,
+                scholasticBackwardness: document.getElementById('scholasticBackwardness').value,
+                teacherRemarks: document.getElementById('teacherRemarks').value
+            };
+
+            const db = getFirestore();
+            const docRef = doc(db, 'patients', id);
+            await setDoc(docRef, { schoolHistory: formData }, { merge: true });
+            
+            onSave();
+        } catch (error) {
+            console.error('Error saving data:', error);
+            alert('Error saving data. Please try again.');
+        }
+    };
 
 
 

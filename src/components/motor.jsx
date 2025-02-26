@@ -1,6 +1,84 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore'
 
-const Motor = () => {
+const Motor = ({ onSave }) => {
+  const [formData, setFormData] = useState({});
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get('id');
+        if (!id) return;
+
+        const db = getFirestore();
+        const docRef = doc(db, 'patients', id);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data.motorAssessment) {
+            setFormData(data.motorAssessment);
+            // Populate form fields
+            Object.keys(data.motorAssessment).forEach(key => {
+              const element = document.getElementById(key);
+              if (element) {
+                element.value = data.motorAssessment[key];
+              }
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const id = urlParams.get('id');
+      if (!id) throw new Error('No ID provided');
+
+      const formData = {
+        // Get all input values from the table
+        RUL_tone: e.target.querySelector('tr:nth-child(1) input:nth-child(1)').value,
+        RUL_power: e.target.querySelector('tr:nth-child(1) input:nth-child(2)').value,
+        RUL_wasting: e.target.querySelector('tr:nth-child(1) input:nth-child(3)').value,
+        RUL_coordination: e.target.querySelector('tr:nth-child(1) input:nth-child(4)').value,
+        RUL_movement: e.target.querySelector('tr:nth-child(1) input:nth-child(5)').value,
+        
+        LUL_tone: e.target.querySelector('tr:nth-child(2) input:nth-child(1)').value,
+        LUL_power: e.target.querySelector('tr:nth-child(2) input:nth-child(2)').value,
+        LUL_wasting: e.target.querySelector('tr:nth-child(2) input:nth-child(3)').value,
+        LUL_coordination: e.target.querySelector('tr:nth-child(2) input:nth-child(4)').value,
+        LUL_movement: e.target.querySelector('tr:nth-child(2) input:nth-child(5)').value,
+        
+        RLL_tone: e.target.querySelector('tr:nth-child(3) input:nth-child(1)').value,
+        RLL_power: e.target.querySelector('tr:nth-child(3) input:nth-child(2)').value,
+        RLL_wasting: e.target.querySelector('tr:nth-child(3) input:nth-child(3)').value,
+        RLL_coordination: e.target.querySelector('tr:nth-child(3) input:nth-child(4)').value,
+        RLL_movement: e.target.querySelector('tr:nth-child(3) input:nth-child(5)').value,
+        
+        LLL_tone: e.target.querySelector('tr:nth-child(4) input:nth-child(1)').value,
+        LLL_power: e.target.querySelector('tr:nth-child(4) input:nth-child(2)').value,
+        LLL_wasting: e.target.querySelector('tr:nth-child(4) input:nth-child(3)').value,
+        LLL_coordination: e.target.querySelector('tr:nth-child(4) input:nth-child(4)').value,
+        LLL_movement: e.target.querySelector('tr:nth-child(4) input:nth-child(5)').value
+      };
+
+      const db = getFirestore();
+      const docRef = doc(db, 'patients', id);
+      await setDoc(docRef, { motorAssessment: formData }, { merge: true });
+      
+      onSave();
+    } catch (error) {
+      console.error('Error saving data:', error);
+      alert('Error saving data. Please try again.');
+    }
+  };
   return (
     <div>
 

@@ -1,26 +1,91 @@
 import React from 'react'
-import { useEffect,useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
+import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore'
 
 const Identi = ({ onSave }) => {
     const [currentDate, setCurrentDate] = useState(null);
+    const [imageUrl, setImageUrl] = useState('');
+    const [formData, setFormData] = useState({});
 
-    useEffect(()=>{
-    const today = new Date();
-    const formattedDate = today.toLocaleDateString(undefined, {
-        year: '2-digit',
-        month: '2-digit',
-        day: '2-digit',
-      });
-      setCurrentDate(formattedDate);
-    })
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const id = urlParams.get('id');
+                if (!id) return;
 
-    const handleSave = (e) => {
+                const db = getFirestore();
+                const docRef = doc(db, 'patients', id);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    setFormData(data);
+                    if (data.identification) {
+                        const identData = data.identification;
+                        document.getElementById('first_name').value = identData.name || '';
+                        document.getElementById('company').value = identData.dob || '';
+                        document.getElementById('phone').value = identData.ubidNo || '';
+                        document.getElementById('website').value = identData.ageSex || '';
+                        document.getElementById('refBy').value = identData.refBy || '';
+                        document.getElementById('informant').value = identData.informant || '';
+                        document.getElementById('visitors').value = identData.aadharNo || '';
+                        setImageUrl(identData.photoUrl || '');
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+        fetchData();
+    }, []);
+
+    useEffect(() => {
+        const today = new Date();
+        const formattedDate = today.toLocaleDateString(undefined, {
+            year: '2-digit',
+            month: '2-digit',
+            day: '2-digit',
+        });
+        setCurrentDate(formattedDate);
+    }, []);
+
+    const handleImageUrlChange = (e) => {
+        setImageUrl(e.target.value);
+    };
+
+    const handleSave = async (e) => {
         e.preventDefault();
-        // TODO: Add your logic to save data to the database
-    
-        // Call the onSave callback to switch to the next tab
-        onSave();
-      };
+        
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+            if (!id) throw new Error('No ID provided');
+
+
+            
+            const formData = {
+                name: e.target.first_name.value,
+                dateCreated: currentDate,
+                photoUrl: imageUrl,
+                dob: e.target.company.value,
+                ubidNo: e.target.phone.value,
+                ageSex: e.target.website.value,
+                refBy: e.target.refBy.value,
+                informant: e.target.informant.value,
+                aadharNo: document.querySelector('input[placeholder="3123 XXXX XXXX"]').value
+            };
+
+            const db = getFirestore();
+            const docRef = doc(db, 'patients', id);
+            await setDoc(docRef, { identification: formData }, { merge: true });
+            
+            onSave();
+        } catch (error) {
+            console.error('Error saving data:', error);
+            alert('Error saving data. Please try again.');
+        }
+    };
 
 
   return (
@@ -50,17 +115,36 @@ const Identi = ({ onSave }) => {
             <input type="text" id="website" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5   dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="14" required/>
         </div>
         <div>
-            <label for="visitors" className="block mb-2 text-sm font-medium text-gray-900  ">Ref. by</label>
-            <input type="text" id="visitors" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5   dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="John" required/>
+            <label for="refBy" className="block mb-2 text-sm font-medium text-gray-900  ">Ref. by</label>
+            <input type="text" id="refBy" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5   dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="John" required/>
         </div>
         <div>
-            <label for="website" className="block mb-2 text-sm font-medium text-gray-900  ">Informant</label>
-            <input type="text" id="website" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5   dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Dilli" required/>
+            <label for="informant" className="block mb-2 text-sm font-medium text-gray-900  ">Informant</label>
+            <input type="text" id="informant" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5   dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Dilli" required/>
         </div>
         <div>
             <label for="visitors" className="block mb-2 text-sm font-medium text-gray-900  ">Aadhar No.</label>
             <input type="text" id="visitors" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5   dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="3123 XXXX XXXX" required/>
         </div>
+    </div>
+    <div className="mt-6 mb-6">
+        <label className="block mb-2 text-sm font-medium text-gray-900">User Photo URL</label>
+        <input
+            type="url"
+            value={imageUrl}
+            onChange={handleImageUrlChange}
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+            placeholder="Enter image URL"
+        />
+        {imageUrl && (
+            <div className="mt-4 relative w-24 h-24">
+                <img
+                    src={imageUrl}
+                    alt="Preview"
+                    className="w-full h-full object-cover rounded-lg"
+                />
+            </div>
+        )}
     </div>
     <button type="submit" className="text-white bg-green-500 transition-colors ease-in-out hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:bg-green-800">Save</button>
 </form>

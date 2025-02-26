@@ -16,6 +16,7 @@ import back from '../assets/back.svg'
 import Motor from './motor';
 import Intellectual from './intellectual';
 import Signature from './signature';
+import NewInputPage from './finalpdf';
 
 const TopTabs = () => {
 
@@ -45,18 +46,19 @@ const TopTabs = () => {
 
       
     <TabList>
-      <Tab>Section 1</Tab>
-      <Tab>Section 2</Tab>
-      <Tab>Section 3</Tab>
-      <Tab>Section 4</Tab>
-      <Tab>Section 5</Tab>
-      <Tab>Section 6</Tab>
-      <Tab>Section 7</Tab>
-      <Tab>Section 8</Tab>
-      <Tab>Section 9</Tab>
-      <Tab>Section 10</Tab>
-      <Tab>Section 11</Tab>
-      <Tab>Section 12</Tab>
+      <Tab>ID Data</Tab>
+      <Tab>Demographic Data</Tab>
+      <Tab>Complaints</Tab>
+      <Tab>Case History</Tab>
+      <Tab>Family History</Tab>
+      <Tab>Developmental History</Tab>
+      <Tab>Expectations</Tab>
+      <Tab>School History</Tab>
+      <Tab>SEA</Tab>
+      <Tab>Medical Examination</Tab>
+      <Tab>Motor</Tab>
+      <Tab>Psychological Assesment</Tab>
+      <Tab>Form</Tab>
     </TabList>
 
     <TabPanel>
@@ -94,6 +96,9 @@ const TopTabs = () => {
     </TabPanel>
     <TabPanel>
       <Intellectual onSave={handleTabChange}/>
+    </TabPanel>
+    <TabPanel>
+      <NewInputPage />
     </TabPanel>
   </Tabs>
   </div>

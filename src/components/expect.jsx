@@ -1,13 +1,57 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore'
 
 const Expect = ({ onSave }) => {
+  const [formData, setFormData] = useState({});
 
-  const handleSave = (e) => {
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get('id');
+        if (!id) return;
+
+        const db = getFirestore();
+        const docRef = doc(db, 'patients', id);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data.expectations) {
+            setFormData(data.expectations);
+            const element = document.getElementById('expectations');
+            if (element) {
+              element.value = data.expectations.expectations;
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const handleSave = async (e) => {
     e.preventDefault();
-    // TODO: Add your logic to save data to the database
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const id = urlParams.get('id');
+      if (!id) throw new Error('No ID provided');
 
-    // Call the onSave callback to switch to the next tab
-    onSave();
+      const formData = {
+        expectations: e.target.expectations.value
+      };
+
+      const db = getFirestore();
+      const docRef = doc(db, 'patients', id);
+      await setDoc(docRef, { expectations: formData }, { merge: true });
+      
+      onSave();
+    } catch (error) {
+      console.error('Error saving data:', error);
+      alert('Error saving data. Please try again.');
+    }
   };
 
 
@@ -19,7 +63,7 @@ const Expect = ({ onSave }) => {
 <form onSubmit={handleSave}>
         
 <div className="mb-6">
-        <label for="email" className="block mb-2 text-sm font-medium text-gray-900  ">Expectations</label>
+        <label htmlFor="email" className="block mb-2 text-5xl font-bold text-gray-900  ">Expectations</label>
         <textarea type="text" id="email" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5   dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder='Any Expectations?' required />
         </div> 
     

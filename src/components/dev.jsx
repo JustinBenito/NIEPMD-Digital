@@ -1,14 +1,85 @@
 
-// eslint-disable-next-line react/prop-types
+import { useState, useEffect } from 'react';
+import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
+
 const Development = ({ onSave }) => {
+  const [formData, setFormData] = useState({});
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get('id');
+        if (!id) return;
 
-  const handleSave = (e) => {
+        const db = getFirestore();
+        const docRef = doc(db, 'patients', id);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data.developmentalHistory) {
+            setFormData(data.developmentalHistory);
+            // Populate milestone fields
+            const milestoneFields = ['smilesAtOthers', 'headControl', 'sitting', 'walking', 'firstWords', 'twoWordPhrases', 'toiletControl'];
+            milestoneFields.forEach(field => {
+              const element = document.getElementById(field);
+              if (element && data.developmentalHistory[field]) {
+                element.value = data.developmentalHistory[field];
+              }
+            });
+            
+            // Populate radio buttons
+            if (data.developmentalHistory.hasSeizure) {
+              document.querySelector(`input[name="list-radio1"][value="${data.developmentalHistory.hasSeizure}"]`).checked = true;
+            }
+            if (data.developmentalHistory.onMedication) {
+              document.querySelector(`input[name="list-radio2"][value="${data.developmentalHistory.onMedication}"]`).checked = true;
+            }
+            
+            // Populate reason field
+            const reasonElement = document.getElementById('reason');
+            if (reasonElement && data.developmentalHistory.reason) {
+              reasonElement.value = data.developmentalHistory.reason;
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const handleSave = async (e) => {
     e.preventDefault();
-    // TODO: Add your logic to save data to the database
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const id = urlParams.get('id');
+      if (!id) throw new Error('No ID provided');
 
-    // Call the onSave callback to switch to the next tab
-    onSave();
+      const formData = {
+        smilesAtOthers: document.getElementById('smilesAtOthers').value,
+        headControl: document.getElementById('headControl').value,
+        sitting: document.getElementById('sitting').value,
+        walking: document.getElementById('walking').value,
+        firstWords: document.getElementById('firstWords').value,
+        twoWordPhrases: document.getElementById('twoWordPhrases').value,
+        toiletControl: document.getElementById('toiletControl').value,
+        hasSeizure: document.querySelector('input[name="list-radio1"]:checked')?.value || '',
+        onMedication: document.querySelector('input[name="list-radio2"]:checked')?.value || '',
+        reason: document.getElementById('reason').value
+      };
+
+      const db = getFirestore();
+      const docRef = doc(db, 'patients', id);
+      await setDoc(docRef, { developmentalHistory: formData }, { merge: true });
+      
+      onSave();
+    } catch (error) {
+      console.error('Error saving data:', error);
+      alert('Error saving data. Please try again.');
+    }
   };
 
 
@@ -44,7 +115,7 @@ const Development = ({ onSave }) => {
             (1 - 4 months)
           </td>
           <td className="px-6 py-4 border-r">
-            <input type="number" placeholder="Enter here" />
+            <input type="number" id="smilesAtOthers" placeholder="Enter here" />
           </td>
         </tr>
         <tr className="bg-white border-b   dark:border-gray-700">
@@ -55,7 +126,7 @@ const Development = ({ onSave }) => {
             (2 - 4 months)
           </td>
           <td className="px-6 py-4 border-r">
-            <input type="number" placeholder="Enter here" />
+            <input type="number" id="headControl" placeholder="Enter here" />
           </td>
         </tr>
         <tr className="bg-white border-b   dark:border-gray-700">
@@ -66,7 +137,7 @@ const Development = ({ onSave }) => {
             (5 - 10 months)
           </td>
           <td className="px-6 py-4 border-r">
-            <input type="number" placeholder="Enter here" />
+            <input type="number" id="sitting" placeholder="Enter here" />
           </td>
         </tr>
         <tr className="bg-white border-b   dark:border-gray-700">
@@ -77,7 +148,7 @@ const Development = ({ onSave }) => {
             (9 - 14 months)
           </td>
           <td className="px-6 py-4 border-r">
-            <input type="number" placeholder="Enter here" />
+            <input type="number" id='walking' placeholder="Enter here" />
           </td>
         </tr>
         <tr className="bg-white border-b   dark:border-gray-700">
@@ -88,7 +159,7 @@ const Development = ({ onSave }) => {
             (7 - 12 months)
           </td>
           <td className="px-6 py-4 border-r">
-            <input type="number" placeholder="Enter here" />
+            <input type="number" id='firstWords' placeholder="Enter here" />
           </td>
         </tr>
         <tr className="bg-white border-b   dark:border-gray-700">
@@ -99,7 +170,7 @@ const Development = ({ onSave }) => {
             (16 - 30 months)
           </td>
           <td className="px-6 py-4 border-r">
-            <input type="number" placeholder="Enter here" />
+            <input type="number" id='twoWordPhrases' placeholder="Enter here" />
           </td>
         </tr>
         <tr className="bg-white border-b   dark:border-gray-700">
@@ -110,7 +181,7 @@ const Development = ({ onSave }) => {
             (3 - 4 years)
           </td>
           <td className="px-6 py-4">
-            <input type="number" placeholder="Enter here" />
+            <input type="number" id="toiletControl" placeholder="Enter here" />
           </td>
         </tr>
       </tbody>
