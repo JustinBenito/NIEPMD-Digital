@@ -1,8 +1,32 @@
-import React, { useState, useEffect } from 'react'
-import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore'
+import React, { useState, useEffect } from 'react';
+import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
 
 const Intellectual = ({ onSave }) => {
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({
+    generalBehavior: '',
+    attentionConcentration: '',
+    activityLevel: '',
+    comprehension: '',
+    emotionalityBehaviour: '',
+    relationship: '',
+    dst: false,
+    sfb: false,
+    vsms: false,
+    misic: false,
+    gds: false,
+    bkt: false,
+    da: '',
+    dq: '',
+    sa: '',
+    sq: '',
+    ma: '',
+    iq: '',
+    furtherTesting: '',
+    intellectualLevel: '',
+    provisionalDiagnosis: '',
+    managementPlan: '',
+    referrals: ''
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -19,16 +43,6 @@ const Intellectual = ({ onSave }) => {
           const data = docSnap.data();
           if (data.intellectualAssessment) {
             setFormData(data.intellectualAssessment);
-            Object.keys(data.intellectualAssessment).forEach(key => {
-              const element = document.getElementById(key);
-              if (element) {
-                if (element.type === 'checkbox') {
-                  element.checked = data.intellectualAssessment[key];
-                } else {
-                  element.value = data.intellectualAssessment[key];
-                }
-              }
-            });
           }
         }
       } catch (error) {
@@ -38,6 +52,14 @@ const Intellectual = ({ onSave }) => {
     fetchData();
   }, []);
 
+  const handleChange = (e) => {
+    const { id, value, type, checked } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [id]: type === 'checkbox' ? checked : value,
+    }));
+  };
+
   const handleSave = async (e) => {
     e.preventDefault();
     try {
@@ -45,25 +67,10 @@ const Intellectual = ({ onSave }) => {
       const id = urlParams.get('id');
       if (!id) throw new Error('No ID provided');
 
-      const formData = {
-        generalBehavior: document.getElementById('generalBehavior').value,
-        attentionConcentration: document.getElementById('attentionConcentration').value,
-        activityLevel: document.getElementById('activityLevel').value,
-        comprehension: document.getElementById('comprehension').value,
-        emotionalityBehaviour: document.getElementById('emotionalityBehaviour').value,
-        relationship: document.getElementById('relationship').value,
-        dst: document.getElementById('dst').checked,
-        sfb: document.getElementById('sfb').checked,
-        vsms: document.getElementById('vsms').checked,
-        misic: document.getElementById('misic').checked,
-        gds: document.getElementById('gds').checked,
-        bkt: document.getElementById('bkt').checked
-      };
-
       const db = getFirestore();
       const docRef = doc(db, 'patients', id);
       await setDoc(docRef, { intellectualAssessment: formData }, { merge: true });
-      
+
       onSave();
     } catch (error) {
       console.error('Error saving data:', error);
@@ -71,196 +78,181 @@ const Intellectual = ({ onSave }) => {
     }
   };
 
-
   return (
-    <div>
-        <div className="container mx-auto p-4">
+    <div className="container mx-auto p-4">
       <h2 className="text-5xl font-bold mb-8">Psychological Assessment</h2>
 
       <div className="mb-4">
         <label htmlFor="generalBehavior" className="block text-sm font-medium mb-1">
           General Behaviour during the assessment:
         </label>
-        <input id="generalBehavior" type="text" className=" bg-gray-50  w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+        <input
+          id="generalBehavior"
+          type="text"
+          className="bg-gray-50 w-full px-3 py-2 rounded-md border border-gray-300 focus:ring-1 focus:ring-blue-500"
+          value={formData.generalBehavior}
+          onChange={handleChange}
+        />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="mb-4">
-          <label htmlFor="attentionConcentration" className="block text-sm font-medium mb-1">
-            Attention & Concentration:
-          </label>
-          <input id="attentionConcentration" type="text" className=" bg-gray-50 w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+        <div>
+          <label htmlFor="attentionConcentration" className="block text-sm font-medium mb-1">Attention & Concentration:</label>
+          <input
+            id="attentionConcentration"
+            type="text"
+            className="bg-gray-50 w-full px-3 py-2 rounded-md border border-gray-300"
+            value={formData.attentionConcentration}
+            onChange={handleChange}
+          />
         </div>
-        <div className="mb-4">
-          <label htmlFor="activityLevel" className="block text-sm font-medium mb-1">
-            Activity Level:
-          </label>
-          <input id="activityLevel" type="text" className=" bg-gray-50 w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+        <div>
+          <label htmlFor="activityLevel" className="block text-sm font-medium mb-1">Activity Level:</label>
+          <input
+            id="activityLevel"
+            type="text"
+            className="bg-gray-50 w-full px-3 py-2 rounded-md border border-gray-300"
+            value={formData.activityLevel}
+            onChange={handleChange}
+          />
         </div>
+      </div>
+
+      <div className="mb-4 mt-4">
+        <label htmlFor="comprehension" className="block text-sm font-medium mb-1">Comprehension:</label>
+        <input
+          id="comprehension"
+          type="text"
+          className="bg-gray-50 w-full px-3 py-2 rounded-md border border-gray-300"
+          value={formData.comprehension}
+          onChange={handleChange}
+        />
       </div>
 
       <div className="mb-4">
-        <label htmlFor="comprehension" className="block text-sm font-medium mb-1">
-          Comprehension:
-        </label>
-        <input id="comprehension" type="text" className=" bg-gray-50 w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+        <label htmlFor="emotionalityBehaviour" className="block text-sm font-medium mb-1">Emotionality & Behaviour:</label>
+        <input
+          id="emotionalityBehaviour"
+          type="text"
+          className="bg-gray-50 w-full px-3 py-2 rounded-md border border-gray-300"
+          value={formData.emotionalityBehaviour}
+          onChange={handleChange}
+        />
       </div>
 
       <div className="mb-4">
-        <label htmlFor="emotionalityBehaviour" className="block text-sm font-medium mb-1">
-          Emotionality & Behaviour:
-        </label>
-        <input id="emotionalityBehaviour" type="text" className=" bg-gray-50 w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+        <label htmlFor="relationship" className="block text-sm font-medium mb-1">Relationship within/outside family:</label>
+        <input
+          id="relationship"
+          type="text"
+          className="bg-gray-50 w-full px-3 py-2 rounded-md border border-gray-300"
+          value={formData.relationship}
+          onChange={handleChange}
+        />
       </div>
 
-      <div className="mb-4">
-        <label htmlFor="relationship" className="block text-sm font-medium mb-1">
-          Relationship within/outside family (significant stressors):
-        </label>
-        <input id="relationship" type="text" className="w-full bg-gray-50  px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+      {/* Psychological Tests */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium mb-2">Psychological tests used (tick):</label>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {['dst', 'sfb', 'vsms', 'misic', 'gds', 'bkt'].map((test) => (
+            <label key={test} className="flex items-center">
+              <input
+                id={test}
+                type="checkbox"
+                className="mr-2"
+                checked={formData[test]}
+                onChange={handleChange}
+              />
+              {test.toUpperCase()}
+            </label>
+          ))}
+        </div>
       </div>
 
-
-     
-
-        <div className="mb-4 w-full items-start">
-          <label htmlFor="psychologicalTests" className="block text-sm font-medium mb-1">
-            Psychological tests used (Please tick):
-          </label>
-
-    <div className='flex flex-row  w-full justify-between items-start'>
-        <div className='flex flex-col'>
-          <div className="flex items-center">
-            <input id="gds" type="checkbox" value="GDS" className="mr-2 bg-gray-50  rounded" />
-            <label htmlFor="gds">DST</label>
-          </div>
-          <div className="flex items-center">
-            <input id="gdt" type="checkbox" value="GDT" className="mr-2 bg-gray-50  rounded" />
-            <label htmlFor="gdt">SFB</label>
-          </div>
+      {/* Results */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium mb-2">Results:</label>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {['da', 'dq', 'sa', 'sq', 'ma', 'iq'].map((field) => (
+            <div key={field}>
+              <label className="block text-xs mb-1">{field.toUpperCase()}</label>
+              <input
+                id={field}
+                type="text"
+                className="bg-gray-50 w-full border rounded"
+                value={formData[field]}
+                onChange={handleChange}
+              />
+            </div>
+          ))}
         </div>
-
-        <div className='flex flex-col'>
-          <div className="flex items-center">
-            <input id="gds" type="checkbox" value="GDS" className="mr-2 bg-gray-50  rounded" />
-            <label htmlFor="gds">VSMS</label>
-          </div>
-          <div className="flex items-center">
-            <input id="gdt" type="checkbox" value="GDT" className="mr-2 bg-gray-50  rounded" />
-            <label htmlFor="gdt">MISIC</label>
-          </div>
-        </div>
-
-        <div className='flex flex-col'>
-          <div className="flex items-center">
-            <input id="gds" type="checkbox" value="GDS" className="mr-2 bg-gray-50  rounded" />
-            <label htmlFor="gds">GDS</label>
-          </div>
-          <div className="flex items-center">
-            <input id="gdt" type="checkbox" value="GDT" className="mr-2 bg-gray-50  rounded" />
-            <label htmlFor="gdt">BKT</label>
-          </div>
-        </div>
-
-        <div className='flex flex-col'>
-          <div className="flex items-center">
-            <input id="gds" type="checkbox" value="GDS" className="mr-2 bg-gray-50  rounded" />
-            <label htmlFor="gds">GDT</label>
-          </div>
-          <div className="flex items-center">
-            <input id="gdt" type="checkbox" value="GDT" className="mr-2 bg-gray-50  rounded" />
-            <label htmlFor="gdt">Any other</label>
-          </div>
-        </div>
-
-    </div>
-
-        </div>
-       
-       
-        <div className="mb-4 w-full items-start">
-          <label htmlFor="psychologicalTests" className="block text-sm font-medium mb-1">
-            Results:
-          </label>
-
-    <div className='flex flex-row  w-full justify-between items-start'>
-        <div className='flex flex-col gap-4'>
-          <div className="flex items-center">
-            <label htmlFor="gds"  className="mr-4">DA</label>
-            <input id="gds" type="input" value="" className="mr-2 bg-gray-50 border border-1 rounded" />
-          </div>
-          <div className="flex items-center">
-            <label htmlFor="gdt" className="mr-4">DQ</label>
-            <input id="gdt" type="input" value="" className="mr-2 bg-gray-50 border border-1 rounded" />
-          </div>
-        </div>
-
-        <div className='flex flex-col gap-4'>
-          <div className="flex items-center">
-            <label htmlFor="gds" className="mr-4">SA</label>
-            <input id="gds" type="input" value="" className="mr-2 bg-gray-50 border border-1 rounded" />
-          </div>
-          <div className="flex items-center">
-            <label htmlFor="gdt" className="mr-4">SQ</label>
-            <input id="gdt" type="input" value="" className="mr-2 bg-gray-50 border border-1 rounded" />
-          </div>
-        </div>
-
-        <div className='flex flex-col gap-4'>
-          <div className="flex items-center">
-            <label htmlFor="gds" className="mr-4">MA</label>
-            <input id="gds" type="input" value="" className="mr-2 bg-gray-50 border border-1 rounded" />
-          </div>
-          <div className="flex items-center">
-            <label htmlFor="gdt" className="mr-4">IQ</label>
-            <input id="gdt" type="input" value="" className="mr-2 bg-gray-50 border border-1 rounded" />
-          </div>
-        </div>
-
-    
-
-    </div>
-
-        </div>
-       
-       <div>
-       <label htmlFor="relationship" className="block text-sm mt-8 font-medium mb-1">
-          Any Other Information:
-        </label>
-
-        <div className="flex items-center">
-            <label htmlFor="gds"  className="mr-4 text-sm">Further testing (if required):</label>
-            <input id="gds" type="input" value="" className="mr-2 bg-gray-50 border border-1 rounded text-sm" />
-        </div>
-
-        <div className="flex items-center mt-4">
-            <label htmlFor="gds"  className="mr-4 text-sm">Intellectual level:</label>
-            <input id="gds" type="input" value="" className="mr-2 bg-gray-50 border border-1 rounded text-sm" />
-        </div>
-
-        <div className="mb-6">
-        <label htmlFor="password" className="block mb-2 text-sm font-medium mt-4 text-gray-900  ">Provisional Diagnosis:</label>
-        <textarea type="password" id="password" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5   dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="" required />
-        </div> 
-
-        <div className="mb-6">
-        <label htmlFor="password" className="block mb-2 text-sm font-medium mt-4 text-gray-900  ">Management Plan:</label>
-        <textarea type="password" id="password" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5   dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="" required />
-        </div> 
-
-        <div className="mb-6">
-        <label htmlFor="password" className="block mb-2 text-sm font-medium mt-4 text-gray-900  ">Referrals:</label>
-        <textarea type="password" id="password" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5   dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="" required />
-        </div> 
-
-        <button onClick={handleSave} type="submit" className="text-white bg-green-500 transition-colors ease-in-out hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:bg-green-800">Save</button>
-
-
-       </div>
       </div>
+
+      {/* Additional Information */}
+      <div className="mb-6">
+        <label htmlFor="furtherTesting" className="block text-sm mb-2">Further testing (if required):</label>
+        <input
+          id="furtherTesting"
+          type="text"
+          className="bg-gray-50 w-full border rounded mb-4"
+          value={formData.furtherTesting}
+          onChange={handleChange}
+        />
+        
+        <label htmlFor="intellectualLevel" className="block text-sm mb-2">Intellectual level:</label>
+        <input
+          id="intellectualLevel"
+          type="text"
+          className="bg-gray-50 w-full border rounded"
+          value={formData.intellectualLevel}
+          onChange={handleChange}
+        />
+      </div>
+
+      {/* Diagnosis, Management and Referrals */}
+      <div className="mb-6">
+        <label htmlFor="provisionalDiagnosis" className="block mb-2 text-sm font-medium text-gray-900">Provisional Diagnosis</label>
+        <textarea
+          id="provisionalDiagnosis"
+          className="bg-gray-50 border rounded-lg w-full p-2.5"
+          placeholder="Enter provisional diagnosis"
+          value={formData.provisionalDiagnosis}
+          onChange={handleChange}
+        />
+      </div>
+
+      <div className="mb-6">
+        <label htmlFor="managementPlan" className="block mb-2 text-sm font-medium text-gray-900">Management Plan</label>
+        <textarea
+          id="managementPlan"
+          className="bg-gray-50 border rounded-lg w-full p-2.5"
+          placeholder="Enter management plan"
+          value={formData.managementPlan}
+          onChange={handleChange}
+        />
+      </div>
+
+      <div className="mb-6">
+        <label htmlFor="referrals" className="block mb-2 text-sm font-medium text-gray-900">Referrals</label>
+        <textarea
+          id="referrals"
+          className="bg-gray-50 border rounded-lg w-full p-2.5"
+          placeholder="Enter referrals"
+          value={formData.referrals}
+          onChange={handleChange}
+        />
+      </div>
+
+      <button
+        onClick={handleSave}
+        type="submit"
+        className="text-white bg-green-500 hover:bg-green-800 focus:ring-4 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+      >
+        Save
+      </button>
     </div>
+  );
+};
 
-  )
-}
-
-export default Intellectual
+export default Intellectual;

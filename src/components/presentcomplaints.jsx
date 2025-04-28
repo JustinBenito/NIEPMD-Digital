@@ -43,7 +43,10 @@ const Present = ({ onSave }) => {
             if (!id) throw new Error('No ID provided');
 
             const formData = {
-                presentComplaints: e.target.presentComplaints.value
+                presentComplaints: e.target.presentComplaints.value,
+                provisionalDiagnosis: e.target.provisionalDiagnosis.value,
+                managementPlan: e.target.managementPlan.value,
+                referrals: e.target.referrals.value
             };
 
             const db = getFirestore();
@@ -64,7 +67,23 @@ const Present = ({ onSave }) => {
                 <div className="mb-6 mt-8">
                     <label htmlFor="presentComplaints" className="block mb-2 text-sm font-medium text-gray-900">Present Complaints</label>
                     <textarea id="presentComplaints" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder='Any Complaints?' required />
-                </div> 
+                </div>
+
+                <div className="mb-6">
+                    <label htmlFor="provisionalDiagnosis" className="block mb-2 text-sm font-medium text-gray-900">Provisional Diagnosis</label>
+                    <textarea id="provisionalDiagnosis" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder='Enter provisional diagnosis' required />
+                </div>
+
+                <div className="mb-6">
+                    <label htmlFor="managementPlan" className="block mb-2 text-sm font-medium text-gray-900">Management Plan</label>
+                    <textarea id="managementPlan" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder='Enter management plan' required />
+                </div>
+
+                <div className="mb-6">
+                    <label htmlFor="referrals" className="block mb-2 text-sm font-medium text-gray-900">Referrals</label>
+                    <textarea id="referrals" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder='Enter referrals' required />
+                </div>
+
                 <button type="submit" className="text-white bg-green-500 transition-colors ease-in-out hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:bg-green-800">Save</button>
             </form>
         </div>

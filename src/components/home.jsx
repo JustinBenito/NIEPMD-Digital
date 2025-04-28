@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Nav from './nav';
 import add from '../assets/add-circle-svgrepo-com.svg';
-import { getFirestore, collection, getDocs, doc, setDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 
 const Home = () => {
@@ -35,16 +35,23 @@ const Home = () => {
     };
 
     const generateUniqueUBID = async () => {
-        while (true) {
-            const newUBID = Math.floor(1000 + Math.random() * 9000).toString();
-            const patients = collection(db, "patients");
-            const patientsData = await getDocs(patients);
+        let isUnique = false;
+        let newUBID = '';
+    
+        const patients = collection(db, "patients");
+        const patientsData = await getDocs(patients);
+    
+        while (!isUnique) {
+            newUBID = Math.floor(1000 + Math.random() * 9000).toString();
             const exists = patientsData.docs.some(doc => doc.id === newUBID);
             if (!exists) {
-                return newUBID;
+                isUnique = true;
             }
         }
+    
+        return newUBID;
     };
+    
 
     const handleUBIDSubmit = async () => {
         if (ubidInput.trim()) {

@@ -1,8 +1,15 @@
-import React, { useState, useEffect } from 'react'
-import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore'
+import React, { useState, useEffect } from 'react';
+import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
 
 const Motor = ({ onSave }) => {
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({
+    RUL_tone: '', RUL_power: '', RUL_wasting: '', RUL_coordination: '', RUL_movement: '',
+    LUL_tone: '', LUL_power: '', LUL_wasting: '', LUL_coordination: '', LUL_movement: '',
+    RLL_tone: '', RLL_power: '', RLL_wasting: '', RLL_coordination: '', RLL_movement: '',
+    LLL_tone: '', LLL_power: '', LLL_wasting: '', LLL_coordination: '', LLL_movement: '',
+    gait: '', investigations: '', medications: '', otherInfo: '',
+    medicalDiagnosis: '', disability: '', treatmentPlan: '', referrals: ''
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -18,14 +25,7 @@ const Motor = ({ onSave }) => {
         if (docSnap.exists()) {
           const data = docSnap.data();
           if (data.motorAssessment) {
-            setFormData(data.motorAssessment);
-            // Populate form fields
-            Object.keys(data.motorAssessment).forEach(key => {
-              const element = document.getElementById(key);
-              if (element) {
-                element.value = data.motorAssessment[key];
-              }
-            });
+            setFormData(prev => ({ ...prev, ...data.motorAssessment }));
           }
         }
       } catch (error) {
@@ -35,58 +35,37 @@ const Motor = ({ onSave }) => {
     fetchData();
   }, []);
 
-  const handleSave = async (e) => {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const id = urlParams.get('id');
       if (!id) throw new Error('No ID provided');
 
-      const formData = {
-        // Get all input values from the table
-        RUL_tone: e.target.querySelector('tr:nth-child(1) input:nth-child(1)').value,
-        RUL_power: e.target.querySelector('tr:nth-child(1) input:nth-child(2)').value,
-        RUL_wasting: e.target.querySelector('tr:nth-child(1) input:nth-child(3)').value,
-        RUL_coordination: e.target.querySelector('tr:nth-child(1) input:nth-child(4)').value,
-        RUL_movement: e.target.querySelector('tr:nth-child(1) input:nth-child(5)').value,
-        
-        LUL_tone: e.target.querySelector('tr:nth-child(2) input:nth-child(1)').value,
-        LUL_power: e.target.querySelector('tr:nth-child(2) input:nth-child(2)').value,
-        LUL_wasting: e.target.querySelector('tr:nth-child(2) input:nth-child(3)').value,
-        LUL_coordination: e.target.querySelector('tr:nth-child(2) input:nth-child(4)').value,
-        LUL_movement: e.target.querySelector('tr:nth-child(2) input:nth-child(5)').value,
-        
-        RLL_tone: e.target.querySelector('tr:nth-child(3) input:nth-child(1)').value,
-        RLL_power: e.target.querySelector('tr:nth-child(3) input:nth-child(2)').value,
-        RLL_wasting: e.target.querySelector('tr:nth-child(3) input:nth-child(3)').value,
-        RLL_coordination: e.target.querySelector('tr:nth-child(3) input:nth-child(4)').value,
-        RLL_movement: e.target.querySelector('tr:nth-child(3) input:nth-child(5)').value,
-        
-        LLL_tone: e.target.querySelector('tr:nth-child(4) input:nth-child(1)').value,
-        LLL_power: e.target.querySelector('tr:nth-child(4) input:nth-child(2)').value,
-        LLL_wasting: e.target.querySelector('tr:nth-child(4) input:nth-child(3)').value,
-        LLL_coordination: e.target.querySelector('tr:nth-child(4) input:nth-child(4)').value,
-        LLL_movement: e.target.querySelector('tr:nth-child(4) input:nth-child(5)').value
-      };
-
       const db = getFirestore();
       const docRef = doc(db, 'patients', id);
       await setDoc(docRef, { motorAssessment: formData }, { merge: true });
-      
-      onSave();
+
+      if (onSave) onSave();
     } catch (error) {
       console.error('Error saving data:', error);
       alert('Error saving data. Please try again.');
     }
   };
+
   return (
     <div>
+      <h1 className="text-5xl font-bold mt-4">Motor</h1>
 
-<h1 className='text-5xl font-bold mt-4'>Motor</h1>
-
-        <table className="w-full mt-8 rounded-xl border  text-sm text-left text-gray-500 dark:text-gray-400 border-collapse">
-  <thead className="text-xs text-gray-700 uppercase bg-gray-50   dark:text-gray-400">
-    <tr>
+      <form onSubmit={handleSubmit}>
+        <table className="w-full mt-8 rounded-xl border text-sm text-left text-gray-500 dark:text-gray-400 border-collapse">
+          <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:text-gray-400">
+          <tr>
       <th scope="col" className="px-6 py-3 border-r border-b">
         Tone
       </th>
@@ -103,126 +82,60 @@ const Motor = ({ onSave }) => {
        Abnormal involuntary Movement
       </th>
     </tr>
-  </thead>
-  <tbody>
-        <tr className="bg-white border-b   dark:border-gray-700">
-          <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap   border-r">
-            RUL
-          </th>
-          <td className="px-6 py-4 border-r">
-          <input type="number" placeholder="Enter here" />
-          </td>
-          <td className="px-6 py-4 border-r">
-          <input type="number" placeholder="Enter here" />
-          </td>
-          <td className="px-6 py-4 border-r">
-          <input type="number" placeholder="Enter here" />
-          </td>
-          <td className="px-6 py-4 border-r">
-          <input type="number" placeholder="Enter here" />
-          </td>
-        </tr>
-        <tr className="bg-white border-b   dark:border-gray-700">
-          <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap   border-r">
-            LUL
-          </th>
-          <td className="px-6 py-4 border-r">
-          <input type="number" placeholder="Enter here" />
-          </td>
-          <td className="px-6 py-4 border-r">
-          <input type="number" placeholder="Enter here" />
-          </td>
-          <td className="px-6 py-4 border-r">
-          <input type="number" placeholder="Enter here" />
-          </td>
-          <td className="px-6 py-4 border-r">
-          <input type="number" placeholder="Enter here" />
-          </td>
-        </tr>
-        <tr className="bg-white border-b   dark:border-gray-700">
-          <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap   border-r">
-            RLL
-          </th>
-          <td className="px-6 py-4 border-r">
-          <input type="number" placeholder="Enter here" />
-          </td>
-          <td className="px-6 py-4 border-r">
-          <input type="number" placeholder="Enter here" />
-          </td>
-          <td className="px-6 py-4 border-r">
-          <input type="number" placeholder="Enter here" />
-          </td>
-          <td className="px-6 py-4 border-r">
-          <input type="number" placeholder="Enter here" />
-          </td>
-        </tr>
-        <tr className="bg-white border-b   dark:border-gray-700">
-          <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap   border-r">
-            LLL
-          </th>
-          <td className="px-6 py-4 border-r">
-          <input type="number" placeholder="Enter here" />
-          </td>
-          <td className="px-6 py-4 border-r">
-          <input type="number" placeholder="Enter here" />
-          </td>
-          <td className="px-6 py-4 border-r">
-          <input type="number" placeholder="Enter here" />
-          </td>
-          <td className="px-6 py-4 border-r">
-          <input type="number" placeholder="Enter here" />
-          </td>
-        </tr>
-      </tbody>
-</table>
+          </thead>
+          <tbody>
+            {['RUL', 'LUL', 'RLL', 'LLL'].map((limb, index) => (
+              <tr key={index} className="bg-white border-b dark:border-gray-700">
+                <th className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap border-r">{limb}</th>
+                {['power', 'wasting', 'coordination', 'movement'].map((aspect, idx) => (
+                  <td key={idx} className="px-6 py-4 border-r">
+                    <input
+                      type="number"
+                      name={`${limb}_${aspect}`}
+                      placeholder="Enter here"
+                      value={formData[`${limb}_${aspect}`] || ''}
+                      onChange={handleChange}
+                      className="border rounded p-2 w-full"
+                    />
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
 
-<div className="mb-6">
-        <label for="password" className="block mb-2 text-sm font-medium text-gray-900 mt-8  ">GAIT</label>
-        <textarea type="password" id="password" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5   dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="" required />
-</div> 
+        {/* Text Areas */}
+        {[
+          { label: 'GAIT', name: 'gait' },
+          { label: 'Investigations Available', name: 'investigations' },
+          { label: 'On Medications', name: 'medications' },
+          { label: 'Any other Information', name: 'otherInfo' },
+          { label: 'Medical Diagnosis', name: 'medicalDiagnosis' },
+          { label: 'Disability', name: 'disability' },
+          { label: 'Treatment Plan', name: 'treatmentPlan' },
+          { label: 'Referral', name: 'referrals' },
+        ].map((field, idx) => (
+          <div key={idx} className="mb-6">
+            <label className="block mb-2 text-sm font-medium text-gray-900 mt-8">{field.label}</label>
+            <textarea
+              name={field.name}
+              value={formData[field.name] || ''}
+              onChange={handleChange}
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+              placeholder=""
+            />
+          </div>
+        ))}
 
-<div className="mb-6">
-        <label for="password" className="block mb-2 text-sm font-medium text-gray-900 mt-8  ">Investigations Available</label>
-        <textarea type="password" id="password" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5   dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="" required />
-</div> 
-
-
-<div className="mb-6">
-        <label for="password" className="block mb-2 text-sm font-medium text-gray-900 mt-8  ">On Medications</label>
-        <textarea type="password" id="password" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5   dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="" required />
-</div> 
-
-
-<div className="mb-6">
-        <label for="password" className="block mb-2 text-sm font-medium text-gray-900 mt-8  ">Any other Information</label>
-        <textarea type="password" id="password" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5   dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="" required />
-</div> 
-
-<div className="mb-6">
-        <label for="password" className="block mb-2 text-sm font-medium text-gray-900 mt-8  ">Medical Diagnosis</label>
-        <textarea type="password" id="password" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5   dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="" required />
-</div> 
-
-
-<div className="mb-6">
-        <label for="password" className="block mb-2 text-sm font-medium text-gray-900 mt-8  ">Disability</label>
-        <textarea type="password" id="password" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5   dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="" required />
-</div> 
-
-
-<div className="mb-6">
-        <label for="password" className="block mb-2 text-sm font-medium text-gray-900 mt-8  ">Treament Plan</label>
-        <textarea type="password" id="password" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5   dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="" required />
-</div> 
-
-<div className="mb-6">
-        <label for="password" className="block mb-2 text-sm font-medium text-gray-900 mt-8  ">Referral</label>
-        <textarea type="password" id="password" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5   dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="" required />
-</div> 
-
-<button type="submit" className="text-white mb-8 bg-green-500 transition-colors ease-in-out hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:bg-green-800">Save</button>
+        <button
+          type="submit"
+          className="text-white mb-8 bg-green-500 transition-colors ease-in-out hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:bg-green-800"
+        >
+          Save
+        </button>
+      </form>
     </div>
-  )
-}
+  );
+};
 
-export default Motor
+export default Motor;

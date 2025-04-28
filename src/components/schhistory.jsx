@@ -1,176 +1,295 @@
-import React, { useState, useEffect } from 'react'
-import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore'
+import React, { useState, useEffect } from 'react';
+import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
+
+const initialFormData = {
+  familyType: '',
+  familyStatus: '',
+  consanguinity: '',
+  accommodation: '',
+  rooms: '',
+  ownership: '',
+  neighbourAttitude: '',
+  familyDynamics: '',
+  health: '',
+  SES: '',
+  provisionalDiagnosis: '',
+  managementPlan: '',
+  referrals: ''
+};
 
 const School = ({ onSave }) => {
-    const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState(initialFormData);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const urlParams = new URLSearchParams(window.location.search);
-                const id = urlParams.get('id');
-                if (!id) return;
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get('id');
+        if (!id) return;
 
-                const db = getFirestore();
-                const docRef = doc(db, 'patients', id);
-                const docSnap = await getDoc(docRef);
+        const db = getFirestore();
+        const docRef = doc(db, 'patients', id);
+        const docSnap = await getDoc(docRef);
 
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    if (data.familyHistory) {
-                        setFormData(data.familyHistory);
-                        Object.keys(data.familyHistory).forEach(key => {
-                            const element = document.getElementById(key);
-                            if (element) {
-                                if (element.type === 'radio') {
-                                    const radio = document.querySelector(`input[name="${key}"][value="${data.familyHistory[key]}"]`);
-                                    if (radio) radio.checked = true;
-                                } else {
-                                    element.value = data.familyHistory[key];
-                                }
-                            }
-                        });
-                    }
-                }
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-        };
-        fetchData();
-    }, []);
-
-    const handleSave = async (e) => {
-        e.preventDefault();
-        try {
-            const urlParams = new URLSearchParams(window.location.search);
-            const id = urlParams.get('id');
-            if (!id) throw new Error('No ID provided');
-
-            const formData = {
-                familyType: document.querySelector('input[name="list-radio1"]:checked')?.value || '',
-                familyStatus: document.querySelector('input[name="list-radio2"]:checked')?.value || '',
-                consanguinity: document.querySelector('input[name="list-radio3"]:checked')?.value || '',
-                accommodation: document.getElementById('accommodation').value,
-                rooms: document.getElementById('rooms').value,
-                ownership: document.getElementById('ownership').value,
-                neighbourAttitude: document.getElementById('neighbourAttitude').value,
-                familyDynamics: document.getElementById('familyDynamics').value
-            };
-
-            const db = getFirestore();
-            const docRef = doc(db, 'patients', id);
-            await setDoc(docRef, { familyHistory: formData }, { merge: true });
-            
-            onSave();
-        } catch (error) {
-            console.error('Error saving data:', error);
-            alert('Error saving data. Please try again.');
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data.familyHistory) {
+            setFormData(prev => ({ ...prev, ...data.familyHistory }));
+          }
         }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
     };
+    fetchData();
+  }, []);
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const id = urlParams.get('id');
+      if (!id) throw new Error('No ID provided');
+
+      const db = getFirestore();
+      const docRef = doc(db, 'patients', id);
+      await setDoc(docRef, { familyHistory: formData }, { merge: true });
+
+      onSave();
+    } catch (error) {
+      console.error('Error saving data:', error);
+      alert('Error saving data. Please try again.');
+    }
+  };
 
   return (
-    <div className='mt-5 border-gray-100 max-w-5xl mx-auto gap-2'> 
-            <h1 className='text-5xl font-bold'>Family History</h1>
+    <div className="mt-5 border-gray-100 max-w-5xl mx-auto gap-2">
+      <h1 className="text-5xl font-bold">Family History</h1>
 
-<form onSubmit={handleSave}>
-<div>        
-<h3 className="mb-4  mt-4 font-semibold text-gray-900  ">Type of Family</h3>
-<ul className="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex   dark:border-gray-600  ">
-    <li className="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600">
-        <div className="flex items-center pl-3">
-            <input id="horizontal-list-radio-license" type="radio" value="" name="list-radio1" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700    dark:border-gray-500"/>
-            <label htmlFor="horizontal-list-radio-license" className="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Driver License </label>
-        </div>
-    </li>
-    <li className="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600">
-        <div className="flex items-center pl-3">
-            <input id="horizontal-list-radio-id" type="radio" value="" name="list-radio1" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700    dark:border-gray-500"/>
-            <label htmlFor="horizontal-list-radio-id" className="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">State ID</label>
-        </div>
-    </li>
-   
-</ul>
-</div>  
-
-<div>        
-<h3 className="mb-4 mt-4 font-semibold text-gray-900  ">Status of Family</h3>
-<ul className="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex   dark:border-gray-600  ">
-    <li className="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600">
-        <div className="flex items-center pl-3">
-            <input id="horizontal-list-radio-license" type="radio" value="" name="list-radio2" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700    dark:border-gray-500"/>
-            <label htmlFor="horizontal-list-radio-license" className="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Intact</label>
-        </div>
-    </li>
-    <li className="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600">
-        <div className="flex items-center pl-3">
-            <input id="horizontal-list-radio-id" type="radio" value="" name="list-radio2" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700    dark:border-gray-500"/>
-            <label htmlFor="horizontal-list-radio-id" className="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Broken</label>
-        </div>
-    </li>
-   
-</ul>
-</div>  
-
-<div>        
-<h3 className="mb-4 mt-4 font-semibold text-gray-900  ">Consanguinity</h3>
-<ul className="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex   dark:border-gray-600  ">
-    <li className="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600">
-        <div className="flex items-center pl-3">
-            <input id="horizontal-list-radio-license" type="radio" value="" name="list-radio3" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700    dark:border-gray-500"/>
-            <label htmlFor="horizontal-list-radio-license" className="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Yes</label>
-        </div>
-    </li>
-    <li className="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600">
-        <div className="flex items-center pl-3">
-            <input id="horizontal-list-radio-id" type="radio" value="" name="list-radio3" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700    dark:border-gray-500"/>
-            <label htmlFor="horizontal-list-radio-id" className="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">No</label>
-        </div>
-    </li>
-   
-</ul>
-</div>  
-
-
-<div>
-    <h1 className=' font-semibold mt-4'>Home Environment</h1>
-    <div className="grid gap-6 mb-6 md:grid-cols-3 mt-4">
+      <form onSubmit={handleSave} className="mt-6">
+        {/* Type of Family */}
         <div>
-            <label htmlFor="first_name" className="block mb-2 text-sm font-medium text-gray-900  ">Accomodation</label>
-            <input type="text" id="accommodation" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5   dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="" required />
+          <h3 className="mb-4 font-semibold text-gray-900">Type of Family</h3>
+          <div className="flex gap-4">
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="familyType"
+                value="Driver License"
+                checked={formData.familyType === 'Driver License'}
+                onChange={handleChange}
+                className="mr-2"
+              />
+              Driver License
+            </label>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="familyType"
+                value="State ID"
+                checked={formData.familyType === 'State ID'}
+                onChange={handleChange}
+                className="mr-2"
+              />
+              State ID
+            </label>
+          </div>
         </div>
-        <div>
-            <label htmlFor="rooms" className="block mb-2 text-sm font-medium text-gray-900  ">No.of rooms</label>
-            <input type="number" id="rooms" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5   dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="2" required />
+
+        {/* Status of Family */}
+        <div className="mt-6">
+          <h3 className="mb-4 font-semibold text-gray-900">Status of Family</h3>
+          <div className="flex gap-4">
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="familyStatus"
+                value="Intact"
+                checked={formData.familyStatus === 'Intact'}
+                onChange={handleChange}
+                className="mr-2"
+              />
+              Intact
+            </label>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="familyStatus"
+                value="Broken"
+                checked={formData.familyStatus === 'Broken'}
+                onChange={handleChange}
+                className="mr-2"
+              />
+              Broken
+            </label>
+          </div>
         </div>
-        <div>
-            <label htmlFor="ownership" className="block mb-2 text-sm font-medium text-gray-900  ">Ownership</label>
-            <input type="text" id="ownership" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5   dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Own/Rental" required />
+
+        {/* Consanguinity */}
+        <div className="mt-6">
+          <h3 className="mb-4 font-semibold text-gray-900">Consanguinity</h3>
+          <div className="flex gap-4">
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="consanguinity"
+                value="Yes"
+                checked={formData.consanguinity === 'Yes'}
+                onChange={handleChange}
+                className="mr-2"
+              />
+              Yes
+            </label>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="consanguinity"
+                value="No"
+                checked={formData.consanguinity === 'No'}
+                onChange={handleChange}
+                className="mr-2"
+              />
+              No
+            </label>
+          </div>
         </div>
+
+        {/* Home Environment Fields */}
+        <div className="grid gap-6 mb-6 md:grid-cols-3 mt-8">
+          <div>
+            <label className="block mb-2 text-sm font-medium">Accommodation</label>
+            <input
+              type="text"
+              name="accommodation"
+              value={formData.accommodation}
+              onChange={handleChange}
+              className="input"
+              required
+            />
+          </div>
+          <div>
+            <label className="block mb-2 text-sm font-medium">No. of Rooms</label>
+            <input
+              type="number"
+              name="rooms"
+              value={formData.rooms}
+              onChange={handleChange}
+              className="input"
+              required
+            />
+          </div>
+          <div>
+            <label className="block mb-2 text-sm font-medium">Ownership</label>
+            <input
+              type="text"
+              name="ownership"
+              value={formData.ownership}
+              onChange={handleChange}
+              className="input"
+              required
+            />
+          </div>
+        </div>
+
+        <div className="mb-6">
+          <label className="block mb-2 text-sm font-medium">Attitude of Neighbours</label>
+          <input
+            type="text"
+            name="neighbourAttitude"
+            value={formData.neighbourAttitude}
+            onChange={handleChange}
+            className="input"
+            required
+          />
+        </div>
+
+        <div className="mb-6">
+          <label className="block mb-2 text-sm font-medium">Family Dynamics</label>
+          <input
+            type="text"
+            name="familyDynamics"
+            value={formData.familyDynamics}
+            onChange={handleChange}
+            className="input"
+            required
+          />
+        </div>
+
+        <div className="mb-6">
+          <label className="block mb-2 text-sm font-medium">Health of Family Members</label>
+          <input
+            type="text"
+            name="health"
+            value={formData.health}
+            onChange={handleChange}
+            className="input"
+            required
+          />
+        </div>
+
+        <div className="mb-6">
+          <label className="block mb-2 text-sm font-medium">Socio-Economic Status</label>
+          <input
+            type="text"
+            name="SES"
+            value={formData.SES}
+            onChange={handleChange}
+            className="input"
+            required
+          />
+        </div>
+
+        {/* Textareas */}
+        <div className="mb-6">
+          <label className="block mb-2 text-sm font-medium">Provisional Diagnosis</label>
+          <textarea
+            name="provisionalDiagnosis"
+            value={formData.provisionalDiagnosis}
+            onChange={handleChange}
+            className="textarea"
+            required
+          />
+        </div>
+
+        <div className="mb-6">
+          <label className="block mb-2 text-sm font-medium">Management Plan</label>
+          <textarea
+            name="managementPlan"
+            value={formData.managementPlan}
+            onChange={handleChange}
+            className="textarea"
+            required
+          />
+        </div>
+
+        <div className="mb-6">
+          <label className="block mb-2 text-sm font-medium">Referrals</label>
+          <textarea
+            name="referrals"
+            value={formData.referrals}
+            onChange={handleChange}
+            className="textarea"
+            required
+          />
+        </div>
+
+        <button
+          type="submit"
+          className="text-white bg-green-500 hover:bg-green-800 font-medium rounded-lg text-sm px-5 py-2.5"
+        >
+          Save
+        </button>
+      </form>
     </div>
-    <div className="mb-6">
-        <label htmlFor="attitute" className="block mb-2 text-sm font-medium text-gray-900  ">Attitude of the Neighbours</label>
-        <input type="text" id="attitute" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5   dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="" required />
-    </div> 
-    <div className="mb-6">
-        <label htmlFor="family" className="block mb-2 text-sm font-medium text-gray-900  ">Family dynamics, ways of coping & problem solving capacities</label>
-        <input type="text" id="family" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5   dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="" required />
-    </div> 
+  );
+};
 
-    <div className="mb-6">
-        <label htmlFor="health" className="block mb-2 text-sm font-medium text-gray-900  ">Health of the family members</label>
-        <input type="text" id="health" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5   dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="" required />
-    </div> 
-
-    <div className="mb-6">
-        <label htmlFor="SES" className="block mb-2 text-sm font-medium text-gray-900  ">Socio - Economic status</label>
-        <input type="text" id="SES" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5   dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="" required />
-    </div> 
-</div>
-<button type="submit" className="text-white bg-green-500 transition-colors ease-in-out hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:bg-green-800">Save</button>
-</form>
-    </div>
-  )
-}
-
-export default School
+export default School;

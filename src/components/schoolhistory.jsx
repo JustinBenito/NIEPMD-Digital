@@ -1,168 +1,183 @@
-import React, { useState, useEffect } from 'react'
-import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore'
+import React, { useState, useEffect } from 'react';
+import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
 
 const SchoolHist = ({ onSave }) => {
-    const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({
+    attendingStatus: '',
+    schoolType: '',
+    passFailStatus: '',
+    schoolProblems: '',
+    scholasticBackwardness: '',
+    aidsHistory: '',
+    provisionalDiagnosis: '',
+    managementPlan: '',
+    referrals: ''
+  });
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const urlParams = new URLSearchParams(window.location.search);
-                const id = urlParams.get('id');
-                if (!id) return;
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
-                const db = getFirestore();
-                const docRef = doc(db, 'patients', id);
-                const docSnap = await getDoc(docRef);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get('id');
+        if (!id) return;
 
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    if (data.schoolHistory) {
-                        setFormData(data.schoolHistory);
-                        Object.keys(data.schoolHistory).forEach(key => {
-                            const element = document.getElementById(key);
-                            if (element) {
-                                if (element.type === 'radio') {
-                                    const radio = document.querySelector(`input[name="${key}"][value="${data.schoolHistory[key]}"]`);
-                                    if (radio) radio.checked = true;
-                                } else {
-                                    element.value = data.schoolHistory[key];
-                                }
-                            }
-                        });
-                    }
-                }
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-        };
-        fetchData();
-    }, []);
+        const db = getFirestore();
+        const docRef = doc(db, 'patients', id);
+        const docSnap = await getDoc(docRef);
 
-    const handleSave = async (e) => {
-        e.preventDefault();
-        try {
-            const urlParams = new URLSearchParams(window.location.search);
-            const id = urlParams.get('id');
-            if (!id) throw new Error('No ID provided');
-
-            const formData = {
-                attendingStatus: document.querySelector('input[name="list-radio2"]:checked')?.value || '',
-                schoolType: document.querySelector('input[name="list-radio3"]:checked')?.value || '',
-                passFailStatus: document.querySelector('input[name="list-radio4"]:checked')?.value || '',
-                schoolProblems: document.getElementById('schoolProblems').value,
-                scholasticBackwardness: document.getElementById('scholasticBackwardness').value,
-                teacherRemarks: document.getElementById('teacherRemarks').value
-            };
-
-            const db = getFirestore();
-            const docRef = doc(db, 'patients', id);
-            await setDoc(docRef, { schoolHistory: formData }, { merge: true });
-            
-            onSave();
-        } catch (error) {
-            console.error('Error saving data:', error);
-            alert('Error saving data. Please try again.');
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data.schoolHistory) {
+            setFormData(data.schoolHistory);
+          }
         }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
     };
+    fetchData();
+  }, []);
 
+  const handleSave = async (e) => {
+    e.preventDefault();
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const id = urlParams.get('id');
+      if (!id) throw new Error('No ID provided');
 
+      const db = getFirestore();
+      const docRef = doc(db, 'patients', id);
+      await setDoc(docRef, { schoolHistory: formData }, { merge: true });
+      alert('Data saved successfully!');
+      onSave();
+    } catch (error) {
+      console.error('Error saving data:', error);
+      alert('Error saving data. Please try again.');
+    }
+  };
 
   return (
-    <div className='mt-5 border-gray-100 max-w-5xl mx-auto gap-2'> 
-    <h2 className='text-5xl font-bold'>School History</h2>
+    <div className="mt-5 border-gray-100 max-w-5xl mx-auto gap-2">
+      <h2 className="text-5xl font-bold">School History</h2>
 
-
-<form>
-<div>        
-<h3 className="block mb-2 font-semibold text-sm mt-4">Whether</h3>
-<ul className="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex   dark:border-gray-600  ">
-    <li className="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600">
-        <div className="flex items-center pl-3">
-            <input id="horizontal-list-radio-license" type="radio" value="" name="list-radio2" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700    dark:border-gray-500"/>
-            <label for="horizontal-list-radio-license" className="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Attending</label>
+      <form onSubmit={handleSave}>
+        {/* Attending Status */}
+        <div>
+          <h3 className="block mb-2 font-semibold text-sm mt-4">Whether</h3>
+          <div className="flex gap-4">
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="attendingStatus"
+                value="Attending"
+                checked={formData.attendingStatus === 'Attending'}
+                onChange={handleChange}
+                className="mr-2"
+              />
+              Attending
+            </label>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="attendingStatus"
+                value="Not Attending"
+                checked={formData.attendingStatus === 'Not Attending'}
+                onChange={handleChange}
+                className="mr-2"
+              />
+              Not Attending
+            </label>
+          </div>
         </div>
-    </li> 
-    <>
-    
-    </>
-     <li className="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600">
-        <div className="flex items-center pl-3">
-            <input id="horizontal-list-radio-id" type="radio" value="" name="list-radio2" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700    dark:border-gray-500"/>
-            <label for="horizontal-list-radio-id" className="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Not Attending</label>
-        </div>
-    </li>
-</ul>
 
-<ul className="items-center mt-2 w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex   dark:border-gray-600  ">
-    <li className="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600">
-        <div className="flex items-center pl-3">
-            <input id="horizontal-list-radio-license" type="radio" value="" name="list-radio3" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700    dark:border-gray-500"/>
-            <label for="horizontal-list-radio-license" className="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Normal School </label>
+        {/* School Type */}
+        <div className="mt-4">
+          <h3 className="block mb-2 font-semibold text-sm">School Type</h3>
+          <div className="flex gap-4 flex-wrap">
+            {['Normal School', 'Special School', 'Integrated School', 'Inclusive School'].map(type => (
+              <label key={type} className="flex items-center">
+                <input
+                  type="radio"
+                  name="schoolType"
+                  value={type}
+                  checked={formData.schoolType === type}
+                  onChange={handleChange}
+                  className="mr-2"
+                />
+                {type}
+              </label>
+            ))}
+          </div>
         </div>
-    </li>
-    <li className="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600">
-        <div className="flex items-center pl-3">
-            <input id="horizontal-list-radio-id" type="radio" value="" name="list-radio3" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700    dark:border-gray-500"/>
-            <label for="horizontal-list-radio-id" className="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Special School </label>
+
+        {/* Pass/Fail Status */}
+        <div className="mt-4">
+          <h3 className="block mb-2 font-semibold text-sm">Whether Passed/Failed</h3>
+          <div className="flex gap-4">
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="passFailStatus"
+                value="Passed"
+                checked={formData.passFailStatus === 'Passed'}
+                onChange={handleChange}
+                className="mr-2"
+              />
+              Passed
+            </label>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="passFailStatus"
+                value="Failed"
+                checked={formData.passFailStatus === 'Failed'}
+                onChange={handleChange}
+                className="mr-2"
+              />
+              Failed
+            </label>
+          </div>
         </div>
-    </li>
-    <li className="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600">
-        <div className="flex items-center pl-3">
-            <input id="horizontal-list-radio-id" type="radio" value="" name="list-radio3" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700    dark:border-gray-500"/>
-            <label for="horizontal-list-radio-id" className="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Integrated School </label>
-        </div>
-    </li>
-    <li className="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600">
-        <div className="flex items-center pl-3">
-            <input id="horizontal-list-radio-id" type="radio" value="" name="list-radio3" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700    dark:border-gray-500"/>
-            <label for="horizontal-list-radio-id" className="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Inclsuive School </label>
-        </div>
-    </li>
-</ul>
 
+        {/* Textareas */}
+        {[
+          { id: 'schoolProblems', label: 'Problems in School', placeholder: 'Any problems?' },
+          { id: 'scholasticBackwardness', label: 'Scholastic Backwardness', placeholder: 'Any scholastic issues?' },
+          { id: 'aidsHistory', label: 'History of Aids and Appliances', placeholder: 'Any?' },
+          { id: 'provisionalDiagnosis', label: 'Provisional Diagnosis', placeholder: 'Enter provisional diagnosis' },
+          { id: 'managementPlan', label: 'Management Plan', placeholder: 'Enter management plan' },
+          { id: 'referrals', label: 'Referrals', placeholder: 'Enter referrals' }
+        ].map(field => (
+          <div key={field.id} className="mb-6">
+            <label htmlFor={field.id} className="block mb-2 text-sm font-medium text-gray-900">
+              {field.label}
+            </label>
+            <textarea
+              id={field.id}
+              name={field.id}
+              value={formData[field.id]}
+              onChange={handleChange}
+              placeholder={field.placeholder}
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+              required
+            />
+          </div>
+        ))}
 
-<div>        
-<h3 className="block mb-2 font-semibold text-sm mt-4">Whether Passed/Failed the present class</h3>
-<ul className="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex   dark:border-gray-600  ">
-    <li className="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600">
-        <div className="flex items-center pl-3">
-            <input id="horizontal-list-radio-license" type="radio" value="" name="list-radio4" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700    dark:border-gray-500"/>
-            <label for="horizontal-list-radio-license" className="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Passed</label>
-        </div>
-    </li>
-    <li className="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600">
-        <div className="flex items-center pl-3">
-            <input id="horizontal-list-radio-id" type="radio" value="" name="list-radio4" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700    dark:border-gray-500"/>
-            <label for="horizontal-list-radio-id" className="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Failed</label>
-        </div>
-    </li>
-</ul>
-</div>
-
-
-</div> 
-
-<div className="mb-6">
-        <label for="email" className="block mb-2 font-semibold text-sm mt-4 text-gray-900  ">Problems in School</label>
-        <textarea type="text" id="email" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5   dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder='Any Problems?' required />
-</div> 
-    
-<div className="mb-6">
-        <label for="email" className="block mb-2 text-sm font-medium text-gray-900  ">Scholastic Backwardness</label>
-        <textarea type="text" id="email" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5   dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder='Any Scholastic Issues?' required />
-</div> 
-    
-<div className="mb-6">
-        <label for="email" className="block mb-2 text-sm font-medium text-gray-900  ">History of Aids and appliances used (If any)</label>
-        <textarea type="text" id="email" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5   dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder='Any?' required />
-</div> 
-    
-</form>
-<button type="submit" className="text-white bg-green-500 transition-colors ease-in-out hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:bg-green-800">Save</button>
-
+        <button
+          type="submit"
+          className="text-white bg-green-500 transition-colors ease-in-out hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
+        >
+          Save
+        </button>
+      </form>
     </div>
-  )
-}
+  );
+};
 
-export default SchoolHist
+export default SchoolHist;

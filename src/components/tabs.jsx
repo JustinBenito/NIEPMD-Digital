@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import {useState} from 'react'
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
 import Identi from './identification';
@@ -17,13 +17,18 @@ import Motor from './motor';
 import Intellectual from './intellectual';
 import Signature from './signature';
 import NewInputPage from './finalpdf';
+import Speech from './speech';
+import Audiology from './audiology';
+import Physiotherapy from './physiotherapy';
+import Occupational from './occupational';
+import Prosthetic from './prosthetic';
 
 const TopTabs = () => {
 
   const [tabIndex, setTabIndex] = useState(0);
 
   const handleTabChange = () => {
-    setTabIndex((prevIndex) => Math.min(prevIndex + 1, 9));
+    setTabIndex((prevIndex) => Math.min(prevIndex + 1, 17));
   };
 
   const goBack = ()=>{
@@ -58,7 +63,12 @@ const TopTabs = () => {
       <Tab>Medical Examination</Tab>
       <Tab>Motor</Tab>
       <Tab>Psychological Assesment</Tab>
-      <Tab>Form</Tab>
+      <Tab>Speech & Language</Tab>
+      <Tab>Audiology</Tab>
+      <Tab>Physio Therapy</Tab>
+      <Tab>Occupational Therapy</Tab>
+      <Tab>Prosthetic & Orthotic</Tab>
+      <Tab>Generate PDF</Tab>
     </TabList>
 
     <TabPanel>
@@ -96,6 +106,21 @@ const TopTabs = () => {
     </TabPanel>
     <TabPanel>
       <Intellectual onSave={handleTabChange}/>
+    </TabPanel>
+    <TabPanel>
+      <Speech onSave={handleTabChange}/>
+    </TabPanel>
+    <TabPanel>
+      <Audiology onSave={handleTabChange}/>
+    </TabPanel>
+    <TabPanel>
+      <Physiotherapy onSave={handleTabChange}/>
+    </TabPanel>
+    <TabPanel>
+      <Occupational onSave={handleTabChange}/>
+    </TabPanel>
+    <TabPanel>
+      <Prosthetic onSave={handleTabChange}/>
     </TabPanel>
     <TabPanel>
       <NewInputPage />
