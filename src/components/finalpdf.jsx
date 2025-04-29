@@ -348,7 +348,7 @@ const NewInputPage = () => {
   
     docPdf.setFont("Helvetica", "normal");
     docPdf.setFontSize(11);
-    docPdf.text("State Highway 49, Post, Muthukadu, Tamil Nadu", 10, y);
+    docPdf.text("ECR, Muttukadu, Kovalam (Post), Chennai, Tamil Nadu", 10, y);
     y += 10;
   
     // Divider line
@@ -359,7 +359,7 @@ const NewInputPage = () => {
     // Report title
     docPdf.setFontSize(20);
     docPdf.setFont("Helvetica", "bold");
-    docPdf.text("Patient Comprehensive Report", pageWidth / 2, y, { align: 'center' });
+    docPdf.text("Client Comprehensive Report", pageWidth / 2, y, { align: 'center' });
     y += 20;
 
 
@@ -378,7 +378,7 @@ const NewInputPage = () => {
   
     // Render leftover fields
     for (const key in patientData) {
-      if (!orderedSections.includes(key) && Object.prototype.hasOwnProperty.call(patientData, key)) {
+      if (!orderedSections.includes(key) && Object.prototype.hasOwnProperty.call(patientData, key) && key !== 'createdAt') {
         renderSection(key, patientData[key]);
       }
     }
@@ -418,13 +418,11 @@ docPdf.text("Signature", pageWidth / 2, sigLineY + 8, { align: 'center' });
 
   return (
     <div className="container mx-auto p-4">
-      <h2 className="text-5xl font-bold mb-8">Patient Information</h2>
+      <h2 className="text-5xl font-bold mb-8">Client Information</h2>
 
       {patientData ? (
         <div className="mb-8">
           <p><strong>Name:</strong> {patientData.name}</p>
-          <p><strong>Age:</strong> {patientData.age}</p>
-          <p><strong>UBID:</strong> {patientData.ubidNo}</p>
         </div>
       ) : (
         <p>No patient data available.</p>

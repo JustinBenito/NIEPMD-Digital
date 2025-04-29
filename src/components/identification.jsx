@@ -107,7 +107,7 @@ const Identi = ({ onSave }) => {
             <input type="text" id="company" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5   dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="21/05/2005" required/>
         </div>  
         <div>
-            <label for="phone" className="block mb-2 text-sm font-medium text-gray-900  ">UBID No.</label>
+            <label for="phone" className="block mb-2 text-sm font-medium text-gray-900  ">UDID No.</label>
             <input type="number" id="phone" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5   dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="123-45-678" pattern="[0-9]{3}-[0-9]{2}-[0-9]{3}" required/>
         </div>
         <div>

@@ -1,10 +1,20 @@
 import { useEffect, useState } from 'react';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import Nav from './nav';
 import add from '../assets/add-circle-svgrepo-com.svg';
 import { collection, getDocs, doc, setDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 
 const Home = () => {
+  const auth = getAuth();
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = '/login';
+      }
+    });
+    return () => unsubscribe();
+  }, [auth]);
     const [reg, setReg] = useState('');
     const [patientsArray, setPatients] = useState([]);
     const [showModal, setShowModal] = useState(false);
@@ -62,7 +72,7 @@ const Home = () => {
                 const exists = patientsData.docs.some(doc => doc.id === ubidInput);
                 
                 if (exists) {
-                    alert("This UBID already exists!");
+                    alert("This UDID already exists!");
                 } else {
                     await setDoc(doc(db, "patients", ubidInput), {
                         name: "",
@@ -89,7 +99,7 @@ const Home = () => {
             window.location.href = `/add?id=${newUBID}`;
         } catch (error) {
             console.error("Error:", error);
-            alert("An error occurred while generating a new UBID.");
+            alert("An error occurred while generating a new UDID.");
             setLoading(false);
         }
     };
@@ -110,7 +120,7 @@ const Home = () => {
                             <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
                         </svg>
                     </div>
-                    <input value={reg} onChange={(e) => setReg(e.target.value)} type="text" id="voice-search" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5    dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search People with UBID" required />
+                    <input value={reg} onChange={(e) => setReg(e.target.value)} type="text" id="voice-search" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5    dark:border-gray-600 dark:placeholder-gray-400   dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search People with UDID" required />
                     <button type="button" className="absolute inset-y-0 end-0 flex items-center pe-3"></button>
                 </div>
                 <button onClick={() => addNew()} className="inline-flex gap-2 items-center py-2.5 px-3 ms-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg ">
@@ -124,7 +134,7 @@ const Home = () => {
                     <div className="bg-white rounded-lg p-6 max-w-sm w-full">
                         {hasUBID === null ? (
                             <div>
-                                <h2 className="text-xl font-bold mb-4">Do you have a UBID?</h2>
+                                <h2 className="text-xl font-bold mb-4">Do you have a UDID?</h2>
                                 <div className="flex justify-end gap-4">
                                     <button
                                         onClick={() => setHasUBID(false)}
@@ -144,13 +154,13 @@ const Home = () => {
                             </div>
                         ) : hasUBID ? (
                             <div>
-                                <h2 className="text-xl font-bold mb-4">Enter your UBID</h2>
+                                <h2 className="text-xl font-bold mb-4">Enter your UDID</h2>
                                 <input
                                     type="text"
                                     value={ubidInput}
                                     onChange={(e) => setUbidInput(e.target.value)}
                                     className="w-full p-2 border rounded mb-4"
-                                    placeholder="Enter UBID"
+                                    placeholder="Enter UDID"
                                     disabled={loading}
                                 />
                                 <div className="flex justify-end gap-4">
@@ -172,8 +182,8 @@ const Home = () => {
                             </div>
                         ) : (
                             <div>
-                                <h2 className="text-xl font-bold mb-4">Create New UBID</h2>
-                                <p className="mb-4">A new unique UBID will be generated for you.</p>
+                                <h2 className="text-xl font-bold mb-4">Create New UDID</h2>
+                                <p className="mb-4">A new unique UDID will be generated for you.</p>
                                 <div className="flex justify-end gap-4">
                                     <button
                                         onClick={() => setShowModal(false)}
@@ -199,7 +209,7 @@ const Home = () => {
             <div className='mt-4'>
                 {patientsArray.map((patient, index) => (
                     <div key={index} className=' border border-gray-200 m-2 flex flex-col p-2 rounded-lg bg-gray-50 mx-auto max-w-lg'>
-                        <p className='text-sm text-gray-400 '>UBID:{patient.id}</p>
+                        <p className='text-sm text-gray-400 '>UDID:{patient.id}</p>
                         <div className='flex flex-row justify-between mt-2'>
                             <h1 className=' text-2xl font-bold'>{patient.data().name}</h1>
                             <button onClick={() => visitId(patient.id)} className="text-white bg-green-500 transition-colors ease-in-out hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded text-sm w-full sm:w-auto px-4 py-1.5 text-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:bg-green-800">Visit</button>
