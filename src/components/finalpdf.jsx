@@ -184,7 +184,13 @@ const NewInputPage = () => {
                   }
                 }
               } else {
-                contentLines.push({ type: 'keyValue', key: key, value: value });
+                if (['provisionalDiagnosis', 'managementPlan', 'referrals'].includes(key)) {
+                  contentLines.push({ type: 'redKey', text: `${key}:` });
+                  contentLines.push({ type: 'onlyValue', text: value });
+                } else {
+                  contentLines.push({ type: 'keyValue', key: key, value: value });
+                }
+                
               }
             }
           }
@@ -256,7 +262,16 @@ const NewInputPage = () => {
             docPdf.text(txt, margin + boxPadding, innerY);
             innerY += lineHeight;
           });
-        } else if (line.type === 'image') {
+        }  else if (line.type === 'redKey') {
+          docPdf.setFont("Helvetica", "bold");
+          docPdf.setTextColor(255, 0, 0); // Red
+          const wrappedText = docPdf.splitTextToSize(line.text, boxWidth - 2 * boxPadding);
+          wrappedText.forEach(txt => {
+            docPdf.text(txt, margin + boxPadding, innerY);
+            innerY += lineHeight;
+          });
+          docPdf.setTextColor(0, 0, 0); // Reset to black       
+        }  else if (line.type === 'image') {
           const imageWidth = 30;
           const imageHeight = 30;
           try {
@@ -265,7 +280,7 @@ const NewInputPage = () => {
             console.error("Failed to load image: ", e);
           }
           innerY += imageHeight + lineHeight;
-        }
+        } 
       });
     
       y += boxHeight + boxSpacing;
@@ -367,6 +382,26 @@ const NewInputPage = () => {
         renderSection(key, patientData[key]);
       }
     }
+
+// Ensure there's enough space for the signature block; otherwise, add a new page
+const signatureHeight = 30; // enough for line + label spacing
+if (y + signatureHeight > docPdf.internal.pageSize.getHeight() - 20) {
+  docPdf.addPage();
+  y = docPdf.internal.pageSize.getTopMargin() || 10; // reset y for new page
+}
+
+// Draw signature line at bottom
+const marginBottom = 20;
+const sigLineY = pageHeight - marginBottom;
+
+docPdf.setLineWidth(0.3);
+docPdf.line(50, sigLineY, pageWidth - 50, sigLineY); // horizontal signature line
+
+docPdf.setFontSize(12);
+docPdf.setFont("Helvetica", "normal");
+docPdf.text("Signature", pageWidth / 2, sigLineY + 8, { align: 'center' });
+
+
   
     docPdf.save(`${patientData.name || 'patient'}-medical-report.pdf`);
   };
