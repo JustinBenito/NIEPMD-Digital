@@ -67,10 +67,10 @@ const History = ({ onSave }) => {
                                 document.querySelector(`input[name="postnatalCondition"][value="${postnatal.condition}"]`).checked = true;
                             }
                             if (postnatal.physicalDeformity) {
-                                document.querySelector(`input[name="list-radio9"][value="${postnatal.physicalDeformity}"]`).checked = true;
+                                document.querySelector(`input[name="physicalDeformity"][value="${postnatal.physicalDeformity}"]`).checked = true;
                             }
                             if (postnatal.sensoryImpairment) {
-                                document.querySelector(`input[name="list-radio10"][value="${postnatal.sensoryImpairment}"]`).checked = true;
+                                document.querySelector(`input[name="sensoryImpairment"][value="${postnatal.sensoryImpairment}"]`).checked = true;
                             }
                             
                             // Set immunization checkboxes
@@ -99,6 +99,14 @@ const History = ({ onSave }) => {
             const id = urlParams.get('id');
             if (!id) throw new Error('No ID provided');
     
+            // Collect immunization data (assuming you have checkboxes for this)
+            const immunizationCheckboxes = document.querySelectorAll('input[type="checkbox"][name^="immunization"]');
+            const immunization = {};
+            immunizationCheckboxes.forEach(checkbox => {
+                immunization[checkbox.value] = checkbox.checked;
+                console.log(checkbox.checked, checkbox.value)
+            });
+    
             const formData = {
                 antenatal: {
                     checkup: document.querySelector('input[name="list-radio1"]:checked')?.value || '',
@@ -122,7 +130,10 @@ const History = ({ onSave }) => {
                 },
                 postnatal: {
                     condition: document.querySelector('input[name="postnatalCondition"]:checked')?.value || '',
-                    previousConsultation: document.getElementById('previousConsultation').value
+                    physicalDeformity: document.querySelector('input[name="physicalDeformity"]:checked')?.value || '',
+                    sensoryImpairment: document.querySelector('input[name="sensoryImpairment"]:checked')?.value || '',
+                    previousConsultation: document.getElementById('previousConsultation').value,
+                    immunization: immunization
                 }
             };
     
@@ -363,7 +374,82 @@ const History = ({ onSave }) => {
                                 <label htmlFor="postnatalCondition-convulsions" className="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Convulsions</label>
                             </div>
                         </li>
+                        <li className="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600">
+                            <div className="flex items-center pl-3">
+                                <input id="postnatalCondition-jaundice" type="radio" value="jaundice" name="postnatalCondition" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 dark:border-gray-500"/>
+                                <label htmlFor="postnatalCondition-jaundice" className="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Jaundice</label>
+                            </div>
+                        </li>
+                        <li className="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600">
+                            <div className="flex items-center pl-3">
+                                <input id="postnatalCondition-infection" type="radio" value="infection" name="postnatalCondition" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 dark:border-gray-500"/>
+                                <label htmlFor="postnatalCondition-infection" className="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Infection</label>
+                            </div>
+                        </li>
+                        <li className="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600">
+                            <div className="flex items-center pl-3">
+                                <input id="postnatalCondition-trauma" type="radio" value="trauma" name="postnatalCondition" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 dark:border-gray-500"/>
+                                <label htmlFor="postnatalCondition-trauma" className="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Trauma</label>
+                            </div>
+                        </li>
                     </ul>
+                </div>
+
+                {/* Physical Deformity */}
+                <div className="mt-8">
+                    <h3 className="mb-4 font-semibold text-gray-900">Physical Deformity</h3>
+                    <ul className="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex dark:border-gray-600">
+                        <li className="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600">
+                            <div className="flex items-center pl-3">
+                                <input id="physicalDeformityYes" type="radio" value="Yes" name="physicalDeformity" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 dark:border-gray-500"/>
+                                <label htmlFor="physicalDeformityYes" className="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Yes</label>
+                            </div>
+                        </li>
+                        <li className="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600">
+                            <div className="flex items-center pl-3">
+                                <input id="physicalDeformityNo" type="radio" value="No" name="physicalDeformity" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 dark:border-gray-500"/>
+                                <label htmlFor="physicalDeformityNo" className="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">No</label>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                {/* Sensory Impairment */}
+                <div className="mt-8">
+                    <h3 className="mb-4 font-semibold text-gray-900">Sensory Impairment</h3>
+                    <ul className="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex dark:border-gray-600">
+                        <li className="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600">
+                            <div className="flex items-center pl-3">
+                                <input id="sensoryImpairmentVision" type="radio" value="Vision" name="sensoryImpairment" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 dark:border-gray-500"/>
+                                <label htmlFor="sensoryImpairmentVision" className="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Vision</label>
+                            </div>
+                        </li>
+                        <li className="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600">
+                            <div className="flex items center pl-3">
+                                <input id="sensoryImpairmentHearing" type="radio" value="Hearing" name="sensoryImpairment" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 dark:border-gray-500"/>
+                                <label htmlFor="sensoryImpairmentHearing" className="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Hearing</label>
+                            </div>
+                        </li>
+                        <li className="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600">
+                            <div className="flex items-center pl-3">
+                                <input id="sensoryImpairmentOthers" type="radio" value="Others" name="sensoryImpairment" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 dark:border-gray-500"/>
+                                <label htmlFor="sensoryImpairmentOthers" className="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Others</label>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                {/* Immunization Checkboxes */}
+                <div className="mt-8">
+                    <h3 className="mb-4 font-semibold text-gray-900">Immunization</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                        {['BCG', 'Polio', 'DPT', 'Measles', 'MMR', 'Pentavalent'].map(vaccine => (
+                            <div key={vaccine} className="flex items-center">
+                                <input id={vaccine} type="checkbox" value={vaccine} name="immunization" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"/>
+                                <label htmlFor={vaccine} className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">{vaccine}</label>
+                            </div>
+                        ))}
+                    </div>
                 </div>
 
                 <div className="mb-6">
